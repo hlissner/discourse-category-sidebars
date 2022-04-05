@@ -19,11 +19,6 @@ sidebar_side:
     - left
     - right
 
-inherit_parent_sidebar:
-  default: true
-  description: |
-    If checked subcategories will inherit their parent category's sidebar (unless the subcategory has its own sidebar assigned). <p>When unchecked subcategories will only display a sidebar if one is specified.</p>
-
 stick_on_scroll: 
   default: true
   description: |

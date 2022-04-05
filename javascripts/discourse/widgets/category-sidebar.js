@@ -4,23 +4,42 @@ import { getOwner } from "discourse-common/lib/get-owner";
 import { h } from "virtual-dom";
 import PostCooked from "discourse/widgets/post-cooked";
 
-function defaultSettings() {
-  return {};
-}
+// This plugin originally only supported:
+// X,postId
+//   match all categories and sub-categories with slug X
+//
+// This fork adds the following:
+// - X/,postId
+//     Any sub-category whose parent's slug is X
+// - /Y,postId
+//     Any subcategory whose slug is Y
+// - X/Y,postId
+//     Any subcategory Y under X
+//
+// With this new specificity, the inherit_parent_sidebar setting is redundant,
+// so it was removed.
 
-function parseSetups(raw) {
+function parseIDs(raw) {
   const parsed = {};
   raw.split("|").forEach((setting) => {
-    const [category, value] = setting.split(",").map((s) => s.trim());
-    parsed[category] = parsed[category] || defaultSettings();
-    parsed[category]["post"] = value;
+    const [target, id] = setting.split(',').map(s => s.trim());
+    parsed[target] = parsed[target] || id;
   });
   return parsed;
 }
 
-function createSidebar(taxonomy) {
-  const setup = setups[taxonomy];
-  const post = [this.getPost(setup["post"])];
+function createSidebar(slug, subSlug) {
+  [slug, subSlug] = [slug, subSlug]
+    .filter(x => x)
+    .map(x => x === '' ? undefined : x);
+  let id = ((slug && subSlug && ids[`${slug}/${subSlug}`])
+            || (subSlug && ids[`/${subSlug}`])
+            || (slug    && ids[`${slug}/`])
+            || (subSlug && ids[subSlug])
+            || (slug    && ids[slug]));
+  if (!id) { return; }
+
+  const post = [this.getPost(id)];
 
   document
     .querySelector("body")
@@ -30,13 +49,14 @@ function createSidebar(taxonomy) {
     .classList.add("with-sidebar", settings.sidebar_side);
 
   return h(
-    "div.category-sidebar-contents " + ".category-sidebar-" + taxonomy,
+    "div.category-sidebar-contents " + ".category-sidebar--"
+      + [slug, subSlug].filter(x => x).join('-'),
     post
   );
 }
 
 const postCache = {};
-const setups = parseSetups(settings.setup);
+const ids = parseIDs(settings.setup);
 
 createWidget("category-sidebar", {
   tagName: "div.sticky-sidebar",
@@ -61,7 +81,7 @@ createWidget("category-sidebar", {
       "category_slug_path_with_id"
     );
 
-    if (setups["all"] && !isCategoryTopicList) {
+    if (ids["all"] && !isCategoryTopicList) {
       return createSidebar.call(this, "all");
     } else if (isCategoryTopicList) {
       const categorySlugPath =
@@ -69,29 +89,10 @@ createWidget("category-sidebar", {
       const categorySlug = categorySlugPath[0];
       const subcategorySlug = categorySlugPath[categorySlugPath.length - 2];
 
-      // If set, show category sidebar
-
-      if (categorySlug && !subcategorySlug && setups[categorySlug]) {
-        return createSidebar.call(this, categorySlug);
-      }
-
-      // If set, show subcategory sidebar
-
-      if (subcategorySlug && setups[subcategorySlug]) {
-        return createSidebar.call(this, subcategorySlug);
-      }
-
-      // if set, subcategory without its own sidebar will inherit parent category's sidebar
-
-      if (
-        subcategorySlug &&
-        !setups[subcategorySlug] &&
-        setups[categorySlug] &&
-        settings.inherit_parent_sidebar
-      ) {
-        return createSidebar.call(this, categorySlug);
-      }
+      const h = createSidebar.call(this, categorySlug, subcategorySlug)
+      if (h) { return h; }
     }
+
     // Remove classes if no sidebar returned
     document
       .querySelector("body")
