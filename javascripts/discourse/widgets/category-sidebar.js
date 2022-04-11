@@ -62,16 +62,16 @@ createWidget("category-sidebar", {
   tagName: "div.sticky-sidebar",
 
   init() {
-    let sidebarWrapper =
-      document.getElementsByClassName("category-sidebar")[0] || 0;
-    let headerHeight =
-      document.getElementsByClassName("d-header-wrap")[0].offsetHeight || 0;
-    let sidebarTop = headerHeight + 20 + "px";
-    let sidebarMaxHeight = "calc(100vh - " + (headerHeight + 40) + "px)";
-    if (sidebarWrapper) {
-      sidebarWrapper.style.maxHeight = sidebarMaxHeight;
-      sidebarWrapper.style.top = sidebarTop;
-    }
+    // let sidebarWrapper =
+    //   document.getElementsByClassName("category-sidebar")[0] || 0;
+    // let headerHeight =
+    //   document.getElementsByClassName("d-header-wrap")[0].offsetHeight || 0;
+    // let sidebarTop = headerHeight + 20 + "px";
+    // let sidebarMaxHeight = "calc(100vh - " + (headerHeight + 40) + "px)";
+    // if (sidebarWrapper) {
+    //   sidebarWrapper.style.maxHeight = sidebarMaxHeight;
+    //   sidebarWrapper.style.top = sidebarTop;
+    // }
   },
 
   html() {
