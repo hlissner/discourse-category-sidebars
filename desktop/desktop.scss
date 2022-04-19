@@ -45,10 +45,6 @@
         order: 3;
         padding: 0;
         position: relative;
-        @if $stick-on-scroll == "true" {
-          position: sticky;
-          overflow-y: auto;
-        }
         .cooked {
           img,
           video,

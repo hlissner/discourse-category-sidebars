@@ -18,8 +18,3 @@ sidebar_side:
   choices: 
     - left
     - right
-
-stick_on_scroll: 
-  default: true
-  description: |
-    When checked sidebar has a sticky position on scroll
