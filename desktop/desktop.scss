@@ -1,9 +1,42 @@
+@function str-split($string, $separator) {
+  $split-arr: ();
+  $index: str-index($string, $separator);
+  @while $index != null {
+    $item: str-slice($string, 1, $index - 1);
+    $split-arr: append($split-arr, $item);
+    $string: str-slice($string, $index + str-length($separator));
+    $index: str-index($string, $separator);
+  }
+  $split-arr: append($split-arr, $string);
+  @return $split-arr;
+}
+
+@function str-trim($string) {
+  @if (str-slice($string, 1, 1) == ' ') {
+    @return str-trim(str-slice($string, 2));
+  } @else if (str-slice($string, str-length($string), -1) == ' ') {
+    @return str-trim(str-slice($string, 1, -2));
+  } @else {
+    @return $string;
+  }
+}
+
 .custom-sidebar .contents > .topic-list {
   // Don't show the sidebar
   > div {
     display: none;
   }
+  // Hide the corresponding "About X" post when the sidebar is visible.
+  @media screen and (min-width: 767px) {
+    @each $rule in str-split($setup, '|') {
+      $id: str-trim(nth(str-split($rule, ','), 2));
+      .topic-list-item[data-topic-id="#{$id}"] {
+        display: none;
+      }
+    }
+  }
 }
+
 @media screen and (min-width: 767px) {
   .custom-sidebar {
     &.sidebar-left .contents > .topic-list {
